@@ -1,0 +1,533 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}{{ carrera.nombre }} - IES Trancas{% endblock %}
+
+{% block extra_styles %}
+<style>
+  /* Estilos específicos para la página de carrera */
+  .carrera-hero {
+    background: linear-gradient(135deg, var(--azul) 0%, var(--azul-med) 100%);
+    color: var(--blanco);
+    padding: 80px 32px 60px;
+    text-align: center;
+    position: relative;
+    overflow: hidden;
+  }
+  
+  .carrera-hero::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+  }
+  
+  .carrera-hero-content {
+    position: relative;
+    max-width: 900px;
+    margin: 0 auto;
+    z-index: 1;
+  }
+  
+  .carrera-hero h1 {
+    font-family: 'Merriweather', serif;
+    font-size: clamp(32px, 6vw, 48px);
+    margin-bottom: 20px;
+    line-height: 1.2;
+  }
+  
+  .carrera-hero .descripcion {
+    font-size: 18px;
+    line-height: 1.6;
+    margin-bottom: 30px;
+    opacity: 0.95;
+  }
+  
+  .carrera-hero .duracion-badge {
+    display: inline-block;
+    background: rgba(248, 97, 6, 0.9);
+    color: var(--azul);
+    padding: 8px 20px;
+    border-radius: 30px;
+    font-weight: 700;
+    font-size: 16px;
+    margin-bottom: 30px;
+  }
+  
+  .carrera-actions {
+    display: flex;
+    gap: 16px;
+    justify-content: center;
+    margin-top: 30px;
+    flex-wrap: wrap;
+  }
+  
+  .btn-volver {
+    background: rgba(255, 255, 255, 0.15);
+    color: var(--blanco);
+    padding: 12px 24px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+  }
+  
+  .btn-volver:hover {
+    background: rgba(255, 255, 255, 0.25);
+    transform: translateY(-2px);
+  }
+  
+  .btn-descargar {
+    background: var(--dorado);
+    color: var(--azul);
+    padding: 12px 24px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    transition: all 0.2s;
+  }
+  
+  .btn-descargar:hover {
+    background: var(--dorado-cl);
+    transform: translateY(-2px);
+  }
+  
+  .carrera-content {
+    padding: 64px 32px;
+    max-width: 1100px;
+    margin: 0 auto;
+  }
+  
+  .carrera-grid {
+    display: grid;
+    grid-template-columns: 2fr 1fr;
+    gap: 48px;
+    margin-top: 40px;
+  }
+  
+  .carrera-info-section {
+    margin-bottom: 40px;
+  }
+  
+  .carrera-info-section h2 {
+    font-family: 'Merriweather', serif;
+    font-size: 28px;
+    color: var(--azul);
+    margin-bottom: 20px;
+    padding-bottom: 12px;
+    border-bottom: 3px solid var(--dorado);
+  }
+  
+  .carrera-info-section p {
+    font-size: 15px;
+    line-height: 1.7;
+    color: #555;
+    margin-bottom: 16px;
+  }
+  
+  .carrera-sidebar {
+    position: sticky;
+    top: 100px;
+  }
+  
+  .carrera-sidebar-card {
+    background: var(--gris-bg);
+    padding: 24px;
+    border-radius: 12px;
+    margin-bottom: 24px;
+    border: 1px solid var(--gris-claro);
+  }
+  
+  .carrera-sidebar-card h3 {
+    font-size: 18px;
+    color: var(--azul);
+    margin-bottom: 16px;
+    font-weight: 700;
+  }
+  
+  .carrera-materias-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .carrera-materias-list li {
+    padding: 10px 12px;
+    margin-bottom: 8px;
+    background: var(--blanco);
+    border-radius: 6px;
+    border-left: 4px solid var(--azul-claro);
+    font-size: 14px;
+    line-height: 1.5;
+  }
+  
+  .carrera-datos-rapidos {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+  
+  .carrera-datos-rapidos li {
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+    font-size: 14px;
+  }
+  
+  .carrera-datos-rapidos li:last-child {
+    border-bottom: none;
+  }
+  
+  .carrera-datos-rapidos strong {
+    color: var(--azul);
+    display: block;
+    margin-bottom: 4px;
+  }
+  
+  .carrera-pdf-box {
+    background: rgba(248, 97, 6, 0.05);
+    padding: 20px;
+    border-radius: 8px;
+    text-align: center;
+    margin-top: 20px;
+    border: 1px solid rgba(248, 97, 6, 0.2);
+  }
+  
+  .carrera-pdf-box p {
+    font-size: 13px;
+    color: #666;
+    margin-bottom: 12px;
+  }
+  
+  .btn-pdf {
+    display: inline-block;
+    background: var(--dorado);
+    color: var(--azul);
+    padding: 10px 20px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 600;
+    font-size: 14px;
+    transition: all 0.2s;
+  }
+  
+  .btn-pdf:hover {
+    background: var(--dorado-cl);
+  }
+  
+  .materias-nota {
+    font-size: 13px;
+    color: #777;
+    font-style: italic;
+    margin-top: -4px;
+    margin-bottom: 16px;
+  }
+
+  .btn-plan-completo {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    background: var(--azul);
+    color: var(--blanco);
+    padding: 12px 22px;
+    border-radius: 6px;
+    text-decoration: none;
+    font-weight: 700;
+    font-size: 14px;
+    transition: all 0.2s;
+  }
+
+  .btn-plan-completo:hover {
+    background: var(--azul-med);
+    transform: translateY(-2px);
+  }
+
+  /* Responsive */
+  @media (max-width: 768px) {
+    .carrera-grid {
+      grid-template-columns: 1fr;
+      gap: 32px;
+    }
+    
+    .carrera-sidebar {
+      position: static;
+    }
+    
+    .carrera-actions {
+      flex-direction: column;
+    }
+    
+    .carrera-hero {
+      padding: 60px 20px 40px;
+    }
+  }
+</style>
+{% endblock %}
+
+{% block body_content %}
+<!-- Hero de la carrera -->
+<section class="carrera-hero">
+  <div class="carrera-hero-content">
+    <h1>{{ carrera.nombre }}</h1>
+    <p class="descripcion">{{ carrera.descripcion }}</p>
+    <div class="duracion-badge">⏱ {{ carrera.duracion }}</div>
+    
+    <div class="carrera-actions">
+      <a href="{% url 'index' %}" class="btn-volver">
+        ← Volver a todas las carreras
+      </a>
+    </div>
+  </div>
+</section>
+
+<!-- Contenido principal -->
+<section class="carrera-content">
+  <div class="carrera-grid">
+    
+    <!-- Columna izquierda: Información detallada -->
+    <div class="carrera-main">
+      <!-- Perfil de Egreso -->
+      <div class="carrera-info-section">
+        <h2>Perfil de Egreso</h2>
+        {% if carrera.perfil_egreso %}
+          {{ carrera.perfil_egreso|linebreaks }}
+        {% else %}
+          <p>No se ha agregado información sobre el perfil de egreso.</p>
+        {% endif %}
+      </div>
+      
+      <!-- Materias -->
+      <div class="carrera-info-section">
+        <h2>Plan de Estudios - Materias</h2>
+        {% if materias_preview %}
+          <ul class="carrera-materias-list">
+            {% for materia in materias_preview %}
+            <li>• {{ materia }}</li>
+            {% empty %}
+            <li>No se han registrado materias.</li>
+            {% endfor %}
+          </ul>
+           {% if materias_restantes > 0 %}
+          <p class="materias-nota">Y {{ materias_restantes }} materia{{ materias_restantes|pluralize }} más en el plan de estudios completo.</p>
+        {% endif %}
+        {% if carrera.plan_estudios_pdf %}
+          <a href="{{ carrera.plan_estudios_pdf.url }}" class="btn-plan-completo" target="_blank" download>
+            📄 Ver plan de estudios completo
+          </a>
+          {% endif %}
+        {% else %}
+          <p>No se han registrado materias.</p>
+        {% endif %}
+      </div>
+      
+      <!-- Otros detalles (podés agregar más secciones aquí) -->
+      <div class="carrera-info-section">
+        <h2>Información Adicional</h2>
+        <p>Para más información sobre inscripciones, horarios y requisitos, por favor contactate con nosotros a través del formulario.</p>
+      </div>
+    </div>
+    
+    <!-- Columna derecha: Sidebar -->
+    <aside class="carrera-sidebar">
+      <div class="carrera-sidebar-card">
+        <h3>Datos Rápidos</h3>
+        <ul class="carrera-datos-rapidos">
+          <li>
+            <strong>Duración</strong>
+            {{ carrera.duracion }}
+          </li>
+          <li>
+            <strong>Modalidad</strong>
+            Presencial
+          </li>
+          <li>
+            <strong>Grado</strong>
+            Técnico Superior
+          </li>
+          <li>
+            <strong>Ubicación</strong>
+            Trancas, Tucumán
+          </li>
+        </ul>
+      </div>
+      
+      <div class="carrera-sidebar-card">
+        <h3>Contacto</h3>
+        <p style="font-size: 14px; line-height: 1.6; margin-bottom: 16px;">
+          ¿Tenés dudas sobre esta carrera? Contactate con nosotros.
+        </p>
+        <a href="#contacto" style="color: var(--azul-claro); font-weight: 700; text-decoration: none;">
+          Ir al formulario de contacto →
+        </a>
+      </div>
+      
+      {% if carrera.resolucion_pdf %}
+      <div class="carrera-pdf-box">
+        <p>Resolución oficial de creación de la carrera</p>
+        <a href="{{ carrera.resolucion_pdf.url }}" class="btn-pdf" target="_blank" download>
+          📄 Descargar PDF
+        </a>
+      </div>
+      {% endif %}
+    </aside>
+    
+  </div>
+</section>
+
+<!-- Sección de Contacto (reutilizada de index, pero con dato prellenado) -->
+<section id="contacto" class="contacto-bg">
+  <div class="container">
+    <div class="section-header">
+      <div class="eyebrow eyebrow-contacto">📞 Comunicación</div>
+      <h2>Ponete en contacto con nosotros</h2>
+      <div class="divider"></div>
+      <p>Estamos para responder tus consultas sobre inscripciones, carreras, horarios y todo lo que necesites saber sobre el instituto.</p>
+    </div>
+
+    <div class="contacto-grid">
+      <div class="contacto-left">
+        <form class="form-contacto" id="formContacto" onsubmit="enviarFormularioContacto(event)">
+          <input type="text" id="nombre" placeholder="Nombre completo" required />
+          <input type="email" id="email" placeholder="Correo electrónico" required />
+          
+          <!-- Campo oculto que se llena automáticamente con el nombre de la carrera -->
+          <input type="hidden" id="motivo_carrera" value="Consulta sobre {{ carrera.nombre }}">
+          
+          <select id="motivo">
+            <option value="general">Consulta General</option>
+            <option value="inscripcion">Inscripción</option>
+            <option value="documentacion">Documentación</option>
+            <option value="carrera">Consulta sobre esta carrera</option>
+            <option value="otro">Otro</option>
+          </select>
+          
+          <textarea id="mensaje" placeholder="Tu mensaje..." required></textarea>
+          <button type="submit" class="btn-enviar">Enviar consulta</button>
+        </form>
+        <div class="form-ok" id="formOk" style="display: none;">✅ ¡Mensaje enviado! Te responderemos a la brevedad.</div>
+      </div>
+
+      <div class="contacto-right">
+        <div id="mapa-container" class="mapa-box"></div>
+        <div class="contacto-datos-bajo">
+          <div class="dato">
+            <span class="dato-icon">📍</span>
+            <span id="direccion-texto">Av. Hipólito Yrigoyen 351, Trancas, Tucumán</span>
+          </div>
+          <div class="dato">
+            <span class="dato-icon">✉️</span>
+            <span id="email-texto">ies@trancas.edu.ar</span>
+          </div>
+          <div class="dato">
+            <span class="dato-icon">🕐</span>
+            <span id="horario-texto">Lun–Vie: 17:00 a 21:30</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+{% endblock %}
+
+{% block extra_scripts %}
+<script>
+  // Lógica del formulario de contacto (reutilizada)
+  function getCookie(name) {
+    let cookieValue = null;
+    if (document.cookie && document.cookie !== '') {
+      const cookies = document.cookie.split(';');
+      for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].trim();
+        if (cookie.startsWith(name + '=')) {
+          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
+          break;
+        }
+      }
+    }
+    return cookieValue;
+  }
+
+  async function enviarFormularioContacto(e) {
+    e.preventDefault();
+    
+    const nombre = document.getElementById('nombre').value;
+    const email = document.getElementById('email').value;
+    const motivoSelect = document.getElementById('motivo').value;
+    const mensaje = document.getElementById('mensaje').value;
+    const motivoCarrera = document.getElementById('motivo_carrera').value;
+
+    // Si el motivo seleccionado es "carrera", usamos el texto prellenado
+    const motivoFinal = motivoSelect === 'carrera' ? motivoCarrera : motivoSelect;
+
+    const datos = {
+      nombre: nombre,
+      email: email,
+      motivo: motivoFinal,
+      mensaje: mensaje
+    };
+
+    const csrftoken = getCookie('csrftoken');
+
+    try {
+      const respuesta = await fetch('/api/contacto/', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'X-CSRFToken': csrftoken
+        },
+        body: JSON.stringify(datos)
+      });
+
+      const resultado = await respuesta.json();
+
+      if (resultado.ok) {
+        document.getElementById('formContacto').style.display = 'none';
+        document.getElementById('formOk').style.display = 'block';
+      } else {
+        alert('Error: ' + resultado.error);
+      }
+    } catch (error) {
+      console.error('Error de red:', error);
+      alert('Error de conexión');
+    }
+  }
+
+  // Cargar mapa (reutilizada)
+  async function cargarMapa() {
+    try {
+      const respuesta = await fetch('/api/config/');
+      const config = await respuesta.json();
+      
+      if (config.url_mapa) {
+        document.getElementById('mapa-container').innerHTML = `
+          <iframe 
+            src="${config.url_mapa}" 
+            width="100%" 
+            height="350" 
+            style="border:0;" 
+            allowfullscreen="" 
+            loading="lazy" 
+            referrerpolicy="no-referrer-when-downgrade">
+          </iframe>
+        `;
+        
+        document.getElementById('direccion-texto').textContent = config.direccion || 'Av. Hipólito Yrigoyen 351, Trancas, Tucumán';
+        document.getElementById('email-texto').textContent = config.email || 'ies@trancas.edu.ar';
+        document.getElementById('horario-texto').textContent = config.horario || 'Lun–Vie: 17:00 a 21:30';
+      }
+    } catch (error) {
+      console.error('Error al cargar el mapa:', error);
+    }
+  }
+
+  // Ejecutar al cargar
+  document.addEventListener('DOMContentLoaded', () => {
+    cargarMapa();
+  });
+</script>
+{% endblock %}

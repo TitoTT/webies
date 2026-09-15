@@ -8,4 +8,5 @@ urlpatterns = [
     path('api/autoridades/', views.api_autoridades, name='api_autoridades'),
     path('api/contacto/', views.api_contacto, name='api_contacto'),
     path('api/config/', views.api_config, name='api_config'),
+     path('carreras/<slug:slug>/', views.detalle_carrera, name='detalle_carrera'),
 ]

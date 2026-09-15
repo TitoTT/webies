@@ -12,9 +12,9 @@ class NoticiaAdmin(admin.ModelAdmin):
 
 @admin.register(Carrera)
 class CarreraAdmin(admin.ModelAdmin):
-    list_display = ('nombre', 'duracion')
+    list_display = ('nombre', 'slug', 'duracion')
     search_fields = ('nombre', 'descripcion')
-
+    prepopulated_fields = {'slug': ('nombre',)}
 
 
 @admin.register(Consulta)

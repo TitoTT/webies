@@ -1,4 +1,6 @@
 from django.db import models
+from django.utils.text import slugify
+from django.utils.translation import gettext_lazy as _
 
 # Create your models here.
 # 1. MODELO DE NOTICIAS
@@ -21,19 +23,29 @@ class Noticia(models.Model):
 
 # 2. MODELO DE CARRERAS
 class Carrera(models.Model):
-    nombre = models.CharField(max_length=200)
-    descripcion = models.TextField()
+    nombre = models.CharField(max_length=200, verbose_name="Nombre de la carrera")
+    slug = models.SlugField(max_length=200, unique=True, blank=True, editable=True)
+    descripcion = models.TextField(verbose_name="descripcion breve")
+    perfil_egreso = models.TextField(blank=True, help_text="perfil del egresado")
     duracion = models.CharField(max_length=50, help_text="Ej: 3 años")
-    # Guardamos las materias como texto separado por comas para simplificar
     materias = models.TextField(help_text="Lista de materias separadas por comas")
+    resolucion_pdf = models.FileField(upload_to='pdfs/resoluciones/', blank=True, null=True, help_text="Resolución del Ministerio (PDF)")
+    resolucion_pdf = models.FileField(upload_to='pdfs/resoluciones/', blank=True, null=True, help_text="Resolución del Ministerio (PDF)")
+    plan_estudios_pdf = models.FileField(upload_to='pdfs/planes_estudio/', blank=True, null=True, help_text="Plan de estudios completo con todas las materias (PDF)")
     imagen = models.CharField(max_length=255, default='imagenes/default_carrera.jpg')
 
     def __str__(self):
         return self.nombre
 
+    def save(self, *args, **kwargs):
+        if not self.slug:
+            self.slug = slugify(self.nombre)
+        super().save(*args, **kwargs)
+
     class Meta:
         verbose_name = 'Carrera'
         verbose_name_plural = 'Carreras'
+        ordering = ['nombre']
 
 
 # 3. MODELO DE AUTORIDADES

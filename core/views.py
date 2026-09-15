@@ -1,5 +1,5 @@
 from django.http import JsonResponse
-from django.shortcuts import render
+from django.shortcuts import render, get_object_or_404
 from .models import Noticia, Carrera, Autoridad, Consulta, ConfigInstitucion
 import json
 
@@ -50,12 +50,13 @@ def api_carreras(request):
     for carrera in carreras_db:
         # Separamos las materias por coma
         materias_list = carrera.materias.split(',')
-        
-        # Usamos comillas simples '' para las claves del diccionario en Python
-        # y comillas dobles "" para los valores si son strings, o usamos comillas simples para todo
+
+        slug = carrera.slug if carrera.slug else ''
+
         carrera_data = {
-            'id': carrera.id,  # Este error de Pylance es solo visual, funciona # type: ignore
+            'id': carrera.id, # type: ignore
             'nombre': carrera.nombre,
+            'slug': slug,
             'descripcion': carrera.descripcion,
             'duracion': carrera.duracion,
             'materias': materias_list,
@@ -65,6 +66,28 @@ def api_carreras(request):
         carreras_json.append(carrera_data)
     
     return JsonResponse(carreras_json, safe=False)
+
+def detalle_carrera(request, slug):
+    """
+    Vista para mostrar el detalle de una carrera específica usando slug.
+    """
+    carrera = get_object_or_404(Carrera, slug=slug)
+
+        # Separamos las materias por coma y limpiamos espacios en blanco
+    materias_list = [m.strip() for m in carrera.materias.split(',') if m.strip()]
+
+    CANTIDAD_PREVIEW = 6
+    materias_preview = materias_list[:CANTIDAD_PREVIEW]
+    materias_restantes = max(len(materias_list) - CANTIDAD_PREVIEW, 0)
+    
+    context = {
+        'carrera': carrera,
+        'materias_list': materias_list,
+        'materias_preview': materias_preview,
+        'materias_restantes': materias_restantes,
+    }
+    
+    return render(request, 'core/detalle_carrera.html', context)
 
 
 def api_autoridades(request):

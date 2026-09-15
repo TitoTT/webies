@@ -73,16 +73,30 @@ function renderizarCarreras(carreras) {
         urlImagen = 'var(--azul-med)'; // Color azul por defecto
     }
 
-    // Generamos el HTML de la tarjeta
-    const materiasTexto = c.materias.join(', '); // Si la API devuelve una lista
+ let urlSlug = c.slug ? c.slug : `temp-id-${c.id}`;
+
+ if (!c.slug || c.slug === '') {
+        console.warn(`Carrera "${c.nombre}" no tiene slug. Se mostrará como enlace temporal.`);
+        // Opción: Crear un enlace que muestre un error o redirija a la home
+        gridCarreras.innerHTML += `
+          <div class="carrera-card" style="opacity: 0.5; pointer-events: none;">
+            <div class="carrera-icono" style="background-image: url('${urlImagen}'); background-size: cover; background-position: center;"></div>
+            <h3>${c.nombre}</h3>
+            <p>${c.descripcion}</p>
+            <span class="carrera-duracion">⚠️ Slug no configurado en DB</span>
+          </div>
+        `;
+        return;
+    }
     
     gridCarreras.innerHTML += `
-      <div class="carrera-card" onclick="abrirModal(${i})">
+      <a href="/carreras/${c.slug}/" class="carrera-card">
         <div class="carrera-icono" style="background-image: url('${urlImagen}'); background-size: cover; background-position: center;"></div>
         <h3>${c.nombre}</h3>
         <p>${c.descripcion}</p>
-        <span class="carrera-duracion">⏱ Duración: ${c.duracion} &nbsp;›&nbsp; Ver materias</span>
-      </div>`;
+        <span class="carrera-duracion">⏱ Duración: ${c.duracion} &nbsp;›&nbsp; Ver detalles</span>
+      </a>
+    `;
   });
 }
 
