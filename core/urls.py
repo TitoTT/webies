@@ -1,12 +1,29 @@
+from django.conf import settings
+from django.contrib.sitemaps.views import sitemap
 from django.urls import path
-from . import views  # O: from .views import api_noticias
+
+from . import views
+from .sitemaps import CarrerasSitemap, NoticiasSitemap, PaginasSitemap
+
+sitemaps = {
+    'paginas': PaginasSitemap,
+    'carreras': CarrerasSitemap,
+    'noticias': NoticiasSitemap,
+}
 
 urlpatterns = [
     path('', views.index, name='index'),
-    path('api/noticias/', views.api_noticias, name='api_noticias'),
-    path('api/carreras/', views.api_carreras, name='api_carreras'),
-    path('api/autoridades/', views.api_autoridades, name='api_autoridades'),
     path('api/contacto/', views.api_contacto, name='api_contacto'),
-    path('api/config/', views.api_config, name='api_config'),
-     path('carreras/<slug:slug>/', views.detalle_carrera, name='detalle_carrera'),
+    path('carreras/<slug:slug>/', views.detalle_carrera, name='detalle_carrera'),
+    path('noticias/', views.lista_noticias, name='lista_noticias'),
+    path('noticias/<slug:slug>/', views.detalle_noticia, name='detalle_noticia'),
+    path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='sitemap'),
+    path('robots.txt', views.robots_txt, name='robots_txt'),
 ]
+
+
+if settings.DEBUG:
+    urlpatterns += [
+        path('error-404/', views.preview_404),
+        path('error-500/', views.preview_500),
+    ]

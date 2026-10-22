@@ -1,254 +1,10 @@
-{% extends 'base.html' %}
+{% extends 'core/base.html' %}
 {% load static %}
 
 {% block title %}IES Trancas - Instituto de Educación Superior{% endblock %}
 
-{% block navbar %}
-<nav>
-  <div class="nav-top">
-    <span>📍 Av. Hipólito Yrigoyen 351, Trancas, Tucumán</span>
-    <span>&nbsp; <a href="mailto:ies@trancas.edu.ar">ies@trancas.edu.ar</a></span>
-  </div>
-  <div class="nav-main">
-    <a href="{% url 'index' %}" class="nav-logo">
-      <img src="{% static 'imagenes/logo.png' %}" alt="logo IES" class="logo-escudo" />
-      <div class="logo-texto">
-        <div class="inst">IES Trancas</div>
-        <div class="sub">Trancas, Tucumán</div>
-      </div>
-    </a>
-    <ul class="nav-links" id="navLinks">
-      <li><a href="#inicio">Inicio</a></li>
-      <li><a href="#noticias">Noticias</a></li>
-      <li><a href="#carreras">Carreras</a></li>
-      <li><a href="#autoridades">Autoridades</a></li>
-      <li><a href="#contacto">Contacto</a></li>
-    </ul>
-    <button class="hamburger" onclick="toggleNav()" aria-label="Menú">
-      <span></span><span></span><span></span>
-    </button>
-  </div>
-</nav>
-{% endblock %}
-
-{% block extra_styles %}
-<style>
-  /* Estilos específicos de la página de inicio */
-  
-  /* Hero */
-  .hero {
-    background: linear-gradient(#005BB5 100%);
-    color: var(--blanco); padding: 80px 32px 70px;
-    text-align: center; position: relative; overflow: hidden;
-  }
-  .hero::before {
-    content: ''; position: absolute; inset: 0;
-    background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-  }
-  .hero-inner { position: relative; max-width: 820px; margin: 0 auto; }
-  .hero-badge {
-    display: inline-block; background: var(--dorado); color: var(--azul);
-    font-size: 17px; font-weight: 700; letter-spacing: 1.5px;
-    padding: 5px 16px; border-radius: 20px; text-transform: uppercase; margin-bottom: 20px;
-  }
-  .hero h1 {
-    font-family: 'Merriweather', serif; font-size: clamp(28px, 8vw, 48px);
-    line-height: 1.15; margin-bottom: 10px;
-  }
-  .hero h1 span { color: var(--dorado-cl); }
-  .hero .subtitulo { font-size: 16px; color: rgba(255,255,255,0.78); margin-bottom: 10px; }
-  .hero .ubicacion { font-size: 14px; color: var(--dorado-cl); margin-bottom: 36px; }
-  .hero-btns { display: flex; gap: 14px; justify-content: center; flex-wrap: wrap; }
-  .btn-primario {
-    background: var(--dorado); color: var(--azul);
-    padding: 13px 28px; border-radius: 6px;
-    font-weight: 700; font-size: 14px; text-decoration: none;
-    transition: background 0.2s, transform 0.15s;
-  }
-  .btn-primario:hover { background: var(--dorado-cl); transform: translateY(-1px); }
-  .btn-secundario {
-    background: transparent; color: var(--blanco);
-    padding: 13px 28px; border-radius: 6px; border: 2px solid rgba(255,255,255,0.5);
-    font-weight: 600; font-size: 14px; text-decoration: none; transition: all 0.2s;
-  }
-  .btn-secundario:hover { border-color: var(--dorado-cl); color: var(--dorado-cl); }
-
-  /* Stats bar */
-  .stats-bar {
-    background: var(--dorado); display: flex;
-    justify-content: center; flex-wrap: wrap;
-  }
-  .stat-item {
-    padding: 18px 40px; text-align: center; color: var(--azul);
-    border-right: 1px solid rgba(0,0,0,0.12);
-  }
-  .stat-item:last-child { border-right: none; }
-  .stat-num { font-size: 26px; font-weight: 700; display: block; }
-  .stat-lbl { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: 0.8px; }
-
-  /* Secciones generales */
-  section { padding: 64px 32px; }
-  .container { max-width: 1100px; margin: 0 auto; }
-  .section-header { text-align: center; margin-bottom: 48px; }
-  .section-header .eyebrow {
-    font-size: 11px; font-weight: 700; letter-spacing: 2px;
-    text-transform: uppercase; color: var(--azul-claro); margin-bottom: 8px;
-  }
-  .section-header .eyebrow-contacto {
-    font-size: 14px;
-    font-weight: 700;
-    letter-spacing: 1.5px;
-    text-transform: uppercase;
-    color: var(--dorado-cl);
-  }
-  .section-header h2 {
-    font-family: 'Merriweather', serif; font-size: clamp(22px, 3.5vw, 32px);
-    color: var(--azul); line-height: 1.2;
-  }
-  .section-header p { margin-top: 12px; color: #666; max-width: 600px; margin-left: auto; margin-right: auto; }
-  .divider { width: 56px; height: 4px; background: var(--dorado); margin: 14px auto 0; border-radius: 2px; }
-
-  /* Noticias */
-  .noticias-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); gap: 24px; }
-  .noticia-card {
-    background: var(--blanco); border-radius: 8px;
-    border: 1px solid var(--gris-claro); overflow: hidden;
-    transition: box-shadow 0.2s, transform 0.2s;
-  }
-  .noticia-card:hover { box-shadow: 0 8px 24px rgba(0,0,0,0.1); transform: translateY(-3px); }
-  .noticia-img {
-    height: 160px; background: var(--azul-med);
-    background-size: cover; background-position: center;
-  }
-  .noticia-body { padding: 20px; }
-  .noticia-cat {
-    font-size: 10px; font-weight: 700; letter-spacing: 1.5px;
-    text-transform: uppercase; color: var(--azul-claro); margin-bottom: 8px;
-  }
-  .noticia-body h3 { font-size: 16px; color: var(--azul); margin-bottom: 8px; font-weight: 600; }
-  .noticia-body p  { font-size: 13px; color: #666; line-height: 1.6; margin-bottom: 14px; }
-  .noticia-fecha   { font-size: 11px; color: #999; }
-  .btn-ver-mas { color: var(--azul-claro); font-size: 13px; font-weight: 600; text-decoration: none; }
-  .btn-ver-mas:hover { color: var(--dorado); }
-
-  /* Carreras */
-  .carreras-bg { background: var(--gris-bg); }
-  .carreras-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 20px; }
-  .carrera-card {
-    background: var(--blanco); border-radius: 8px;
-    border: 1px solid var(--gris-claro); padding: 24px 20px;
-    transition: all 0.2s; cursor: pointer;
-  }
-  .carrera-card:hover { border-color: var(--azul-claro); box-shadow: 0 4px 16px rgba(0,51,102,0.1); }
-  .carrera-icono {
-    width: 52px; height: 52px; border-radius: 12px;
-    background: var(--azul);
-    background-size: cover; background-position: center;
-    margin-bottom: 16px;
-  }
-  .carrera-card h3 { font-size: 15px; color: var(--azul); font-weight: 600; margin-bottom: 8px; }
-  .carrera-card p  { font-size: 13px; color: #666; line-height: 1.55; margin-bottom: 14px; }
-  .carrera-duracion { font-size: 12px; color: var(--azul-claro); font-weight: 600; }
-
-  /* Autoridades */
-  .autoridades-grid {
-    display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 24px;
-  }
-  .autoridad-card {
-    text-align: center; padding: 28px 20px;
-    border: 1px solid var(--gris-claro); border-radius: 8px;
-    transition: box-shadow 0.2s;
-  }
-  .autoridad-card:hover { box-shadow: 0 6px 20px rgba(0,0,0,0.08); }
-  .autoridad-avatar {
-    width: 80px; height: 80px; border-radius: 50%;
-    background: var(--azul-med); display: flex;
-    align-items: center; justify-content: center;
-    font-size: 30px; margin: 0 auto 16px; color: white; font-weight: 700;
-  }
-  .autoridad-card h3 { font-size: 15px; color: var(--azul); font-weight: 600; }
-  .autoridad-card p  { font-size: 12px; color: #888; margin-top: 4px; }
-
-  /* Contacto */
-  .contacto-bg {
-    background: var(--azul); color: white; padding: 64px 32px;
-  }
-  .contacto-grid {
-    display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start;
-    max-width: 1100px; margin: 0 auto;
-  }
-  .contacto-left { display: flex; flex-direction: column; gap: 14px; }
-  .form-contacto { display: flex; flex-direction: column; gap: 14px; }
-  .form-contacto input, .form-contacto textarea, .form-contacto select {
-    width: 100%; padding: 11px 14px; border-radius: 6px;
-    border: 1px solid rgba(255, 255, 255, 0.2);
-    background: rgba(255, 255, 255, 0.1); color: white;
-    font-size: 14px; font-family: 'Inter', sans-serif; outline: none;
-    transition: border 0.2s;
-  }
-  .form-contacto input::placeholder, .form-contacto textarea::placeholder {
-    color: rgba(255, 255, 255, 0.45);
-  }
-  .form-contacto input:focus, .form-contacto textarea:focus { border-color: var(--dorado-cl); }
-  .form-contacto select option { background: var(--azul); }
-  .form-contacto textarea { resize: vertical; min-height: 100px; }
-  .btn-enviar {
-    background: var(--dorado); color: var(--azul);
-    padding: 13px; border-radius: 6px; border: none;
-    font-weight: 700; font-size: 14px; cursor: pointer; transition: background 0.2s;
-  }
-  .btn-enviar:hover { background: var(--dorado-cl); }
-  .form-ok { display: none; text-align: center; padding: 20px; background: rgba(255, 255, 255, 0.1); border-radius: 8px; font-size: 15px; margin-top: 10px; }
-  .contacto-right { display: flex; flex-direction: column; gap: 24px; }
-  .mapa-box { border-radius: 12px; overflow: hidden; box-shadow: 0 8px 24px rgba(0, 0, 0, 0.3); height: 350px; width: 100%; }
-  .mapa-box iframe { width: 100%; height: 100%; border: 0; display: block; }
-  .contacto-datos-bajo {
-    display: flex; flex-direction: column; gap: 12px;
-    background: rgba(255, 255, 255, 0.05); padding: 20px; border-radius: 12px;
-    border: 1px solid rgba(255, 255, 255, 0.1);
-  }
-  .contacto-datos-bajo .dato { display: flex; align-items: center; gap: 12px; font-size: 14px; color: rgba(255,255,255,0.85); line-height: 1.5; }
-  .contacto-datos-bajo .dato-icon { font-size: 18px; color: var(--dorado-cl); }
-
-  /* Footer */
-  footer { background: #001A33; color: rgba(255,255,255,0.65); padding: 40px 32px 20px; }
-  .footer-inner { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 32px; max-width: 1100px; margin: 0 auto 28px; }
-  footer h4 { color: white; font-size: 14px; margin-bottom: 14px; }
-  footer p, footer a { font-size: 13px; line-height: 1.7; color: rgba(255,255,255,0.6); text-decoration: none; }
-  footer a:hover { color: var(--dorado-cl); }
-  footer ul { list-style: none; }
-  footer ul li { margin-bottom: 8px; }
-  .footer-bottom { border-top: 1px solid rgba(255,255,255,0.1); padding-top: 18px; text-align: center; font-size: 12px; max-width: 1100px; margin: 0 auto; color: rgba(255,255,255,0.4); }
-
-  /* Modal */
-  .modal-overlay { display: none; position: fixed; inset: 0; background: rgba(0,0,0,0.6); z-index: 200; align-items: center; justify-content: center; }
-  .modal-overlay.activo { display: flex; }
-  .modal-box { background: white; border-radius: 10px; padding: 32px; max-width: 500px; width: 90%; position: relative; }
-  .modal-close { position: absolute; top: 14px; right: 18px; font-size: 22px; cursor: pointer; color: #999; background: none; border: none; }
-  .modal-box h3 { color: var(--azul); font-size: 20px; margin-bottom: 8px; }
-  .modal-box p  { font-size: 14px; color: #555; line-height: 1.6; }
-  .modal-box ul { margin: 12px 0 0 20px; font-size: 14px; color: #555; }
-  .modal-box ul li { margin-bottom: 6px; }
-
-  /* Responsive */
-  @media (max-width: 768px) {
-    .nav-links { display: none; flex-direction: column; position: absolute; top: 100%; left: 0; right: 0; background: var(--azul); padding: 12px 0; }
-    .nav-links.abierto { display: flex; }
-    .nav-links a { padding: 12px 24px; }
-    .hamburger { display: flex; }
-    nav { position: relative; }
-    .contacto-grid { grid-template-columns: 1fr; gap: 32px; }
-    .mapa-box { height: 300px; }
-    .contacto-datos-bajo { order: -1; }
-    .footer-inner { grid-template-columns: 1fr; }
-    .stat-item { padding: 14px 20px; }
-    section { padding: 48px 20px; }
-  }
-</style>
-{% endblock %}
-
 {% block body_content %}
-<!-- HERO -->
+
 <section class="hero" id="inicio">
   <div class="hero-inner">
     <span class="hero-badge">Instituto de Educación Superior</span>
@@ -262,27 +18,33 @@
   </div>
 </section>
 
-<!-- STATS -->
+
 <div class="stats-bar">
+  {% if config_institucion.stat_estudiantes %}
   <div class="stat-item">
-    <span class="stat-num">+150</span>
+    <span class="stat-num">{{ config_institucion.stat_estudiantes }}</span>
     <span class="stat-lbl">Estudiantes</span>
   </div>
+  {% endif %}
   <div class="stat-item">
-    <span class="stat-num">3</span>
-    <span class="stat-lbl">Carreras</span>
+    <span class="stat-num">{{ total_carreras }}</span>
+    <span class="stat-lbl">Carrera{{ total_carreras|pluralize }}</span>
   </div>
+  {% if config_institucion.stat_docentes %}
   <div class="stat-item">
-    <span class="stat-num">+30</span>
+    <span class="stat-num">{{ config_institucion.stat_docentes }}</span>
     <span class="stat-lbl">Docentes</span>
   </div>
+  {% endif %}
+  {% if config_institucion.stat_anios %}
   <div class="stat-item">
-    <span class="stat-num">+15</span>
+    <span class="stat-num">{{ config_institucion.stat_anios }}</span>
     <span class="stat-lbl">Años de historia</span>
   </div>
+  {% endif %}
 </div>
 
-<!-- NOTICIAS -->
+
 <section id="noticias">
   <div class="container">
     <div class="section-header">
@@ -291,11 +53,30 @@
       <div class="divider"></div>
       <p>Mantente informado sobre las novedades del instituto</p>
     </div>
-    <div class="noticias-grid" id="noticiasGrid"></div>
+    <div class="noticias-grid" id="noticiasGrid">
+  {% for n in noticias %}
+  <a href="{% url 'detalle_noticia' n.slug %}" class="noticia-card">
+    <div class="noticia-img" {% if n.imagen %}style="background-image: url('{{ n.imagen.url }}');"{% endif %}></div>
+    <div class="noticia-body">
+      <div class="noticia-cat">{{ n.categoria }}</div>
+      <h3>{{ n.titulo }}</h3>
+      <p>{{ n.resumen|default:n.texto|truncatechars:150 }}</p>
+      <span class="noticia-fecha">📅 {{ n.fecha_publicacion|date:"j \\d\\e F, Y" }}</span>
+    </div>
+  </a>
+  {% empty %}
+  <p>Todavía no hay noticias publicadas.</p>
+  {% endfor %}
+      {% if hay_mas_noticias %}
+    <div class="ver-todas">
+      <a href="{% url 'lista_noticias' %}" class="btn-ver-todas">Ver todas las noticias →</a>
+    </div>
+    {% endif %}
+</div>
   </div>
 </section>
 
-<!-- CARRERAS -->
+
 <section id="carreras" class="carreras-bg">
   <div class="container">
     <div class="section-header">
@@ -304,11 +85,22 @@
       <div class="divider"></div>
       <p>Tecnicaturas y profesorados de nivel superior para tu desarrollo profesional</p>
     </div>
-    <div class="carreras-grid" id="carrerasGrid"></div>
+    <div class="carreras-grid" id="carrerasGrid">
+  {% for c in carreras %}
+  <a href="{% url 'detalle_carrera' c.slug %}" class="carrera-card">
+    <div class="carrera-icono" {% if c.imagen %}style="background-image: url('{{ c.imagen.url }}');"{% endif %}></div>
+    <h3>{{ c.nombre }}</h3>
+    <p>{{ c.descripcion }}</p>
+    <span class="carrera-duracion">⏱ Duración: {{ c.duracion }} › Ver detalles</span>
+  </a>
+  {% empty %}
+  <p>Todavía no hay carreras cargadas.</p>
+  {% endfor %}
+</div>
   </div>
 </section>
 
-<!-- AUTORIDADES -->
+
 <section id="autoridades">
   <div class="container">
     <div class="section-header">
@@ -316,132 +108,22 @@
       <h2>Autoridades</h2>
       <div class="divider"></div>
     </div>
-    <div class="autoridades-grid" id="autoridadesGrid"></div>
+    <div class="autoridades-grid" id="autoridadesGrid">
+  {% for a in autoridades %}
+  <div class="autoridad-card">
+    <div class="autoridad-avatar">{{ a.iniciales }}</div>
+    <h3>{{ a.nombre }}</h3>
+    <p>{{ a.cargo }}</p>
+  </div>
+  {% endfor %}
+</div>
   </div>
 </section>
 
-<!-- CONTACTO -->
-<section id="contacto" class="contacto-bg">
-  <div class="container">
-    <div class="section-header">
-      <div class="eyebrow eyebrow-contacto">📞 Comunicación</div>
-      <h2>Ponete en contacto con nosotros</h2>
-      <div class="divider"></div>
-      <p>Estamos para responder tus consultas sobre inscripciones, carreras, horarios y todo lo que necesites saber sobre el instituto.</p>
-    </div>
 
-    <div class="contacto-grid">
-      <div class="contacto-left">
-        <form class="form-contacto" id="formContacto" onsubmit="enviarFormularioContacto(event)">
-          <input type="text" id="nombre" placeholder="Nombre completo" required />
-          <input type="email" id="email" placeholder="Correo electrónico" required />
-          <select id="motivo">
-            <option value="">Motivo de consulta</option>
-            <option value="general">Consulta General</option>
-            <option value="inscripcion">Inscripción</option>
-            <option value="documentacion">Documentación</option>
-            <option value="otro">Otro</option>
-          </select>
-          <textarea id="mensaje" placeholder="Tu mensaje..." required></textarea>
-          <button type="submit" class="btn-enviar">Enviar consulta</button>
-        </form>
-        <div class="form-ok" id="formOk" style="display: none;">✅ ¡Mensaje enviado! Te responderemos a la brevedad.</div>
-      </div>
-
-      <div class="contacto-right">
-        <div id="mapa-container" class="mapa-box"></div>
-        <div class="contacto-datos-bajo">
-          <div class="dato">
-            <span class="dato-icon">📍</span>
-            <span id="direccion-texto">Av. Hipólito Yrigoyen 351, Trancas, Tucumán</span>
-          </div>
-          <div class="dato">
-            <span class="dato-icon">✉️</span>
-            <span id="email-texto">ies@trancas.edu.ar</span>
-          </div>
-          <div class="dato">
-            <span class="dato-icon">🕐</span>
-            <span id="horario-texto">Lun–Vie: 17:00 a 21:30</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
+{% include 'core/_contacto.html' %}
 {% endblock %}
 
 {% block extra_scripts %}
-<script>
-  // Función para obtener el token CSRF
-  function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-      const cookies = document.cookie.split(';');
-      for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i].trim();
-        if (cookie.startsWith(name + '=')) {
-          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-          break;
-        }
-      }
-    }
-    return cookieValue;
-  }
 
-  // Cargar noticias
-  async function cargarNoticias() {
-    try {
-      const respuesta = await fetch('/api/noticias/');
-      const noticias = await respuesta.json();
-      renderizarNoticias(noticias);
-    } catch (error) {
-      console.error('Error al cargar noticias:', error);
-      document.getElementById('noticiasGrid').innerHTML = '<p>Error al cargar las noticias. Intentá más tarde.</p>';
-    }
-  }
-
-  function renderizarNoticias(noticias) {
-    const gridNoticias = document.getElementById('noticiasGrid');
-    gridNoticias.innerHTML = '';
-    
-    noticias.forEach(n => {
-      gridNoticias.innerHTML += `
-        <div class="noticia-card">
-          <div class="noticia-img" style="background-image: url('/static/${n.imagen}')"></div>
-          <div class="noticia-body">
-            <div class="noticia-cat">${n.categoria}</div>
-            <h3>${n.titulo}</h3>
-            <p>${n.texto}</p>
-            <span class="noticia-fecha">📅 ${n.fecha}</span>
-          </div>
-        </div>`;
-    });
-  }
-
-  // Cargar carreras
-  async function cargarCarreras() {
-    try {
-      const respuesta = await fetch('/api/carreras/');
-      const carreras = await respuesta.json();
-      renderizarCarreras(carreras);
-    } catch (error) {
-      console.error('Error al cargar carreras:', error);
-      document.getElementById('carrerasGrid').innerHTML = '<p>Error al cargar las carreras.</p>';
-    }
-  }
-
-  function renderizarCarreras(carreras) {
-    const gridCarreras = document.getElementById('carrerasGrid');
-    gridCarreras.innerHTML = '';
-    
-    carreras.forEach((c, i) => {
-      let urlImagen = '/static/' + c.imagen;
-      
-      if (!c.imagen || c.imagen.trim() === '') {
-        urlImagen = 'var(--azul-med)';
-      }
-
-      gridCarreras.innerHTML += `
-        <a href="/carreras/${c.pk}/" class="carrera-card">
-          <div class="carrera-icono" style="background-image: url('${urlImagen}'); background-size: cover; background-position: center;"></div>
-          <h
+{% endblock %}

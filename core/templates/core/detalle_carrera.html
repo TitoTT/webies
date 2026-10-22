@@ -1,7 +1,7 @@
 {% extends 'core/base.html' %}
 {% load static %}
 
-{% block title %}{{ carrera.nombre }} - IES Trancas{% endblock %}
+{% block title %}{{ carrera.nombre }} - Instituto de Educacion Superior{% endblock %}
 
 {% block extra_styles %}
 <style>
@@ -82,7 +82,7 @@
   
   .btn-descargar {
     background: var(--dorado);
-    color: var(--azul);
+    color: var(--texto-sobre-dorado);
     padding: 12px 24px;
     border-radius: 6px;
     text-decoration: none;
@@ -207,7 +207,7 @@
   .btn-pdf {
     display: inline-block;
     background: var(--dorado);
-    color: var(--azul);
+    color: var(--texto-sobre-dorado);
     padding: 10px 20px;
     border-radius: 6px;
     text-decoration: none;
@@ -222,10 +222,49 @@
   
   .materias-nota {
     font-size: 13px;
-    color: #777;
+    color: #666;
     font-style: italic;
     margin-top: -4px;
     margin-bottom: 16px;
+  }
+    .salidas-lista, .convenios-lista {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+  }
+
+  .salidas-lista li {
+    padding: 10px 12px 10px 34px;
+    margin-bottom: 8px;
+    background: var(--blanco);
+    border-radius: 6px;
+    border-left: 4px solid var(--dorado);
+    font-size: 14px;
+    line-height: 1.5;
+    position: relative;
+  }
+
+  .salidas-lista li::before {
+    content: '';
+    position: absolute;
+    left: 10px;
+  }
+
+  .convenios-lista li {
+    padding: 10px 12px 10px 34px;
+    margin-bottom: 8px;
+    background: var(--gris-bg);
+    border-radius: 6px;
+    border: 1px solid var(--gris-claro);
+    font-size: 14px;
+    line-height: 1.5;
+    position: relative;
+  }
+
+  .convenios-lista li::before {
+    content: '';
+    position: absolute;
+    left: 10px;
   }
 
   .btn-plan-completo {
@@ -245,6 +284,18 @@
   .btn-plan-completo:hover {
     background: var(--azul-med);
     transform: translateY(-2px);
+  }
+
+  .inscripciones-box {
+    background: rgba(248, 97, 6, 0.05);
+    border: 1px solid rgba(248, 97, 6, 0.25);
+    border-left: 4px solid var(--dorado);
+    border-radius: 8px;
+    padding: 20px 22px;
+  }
+
+  .inscripciones-box p:last-child {
+    margin-bottom: 0;
   }
 
   /* Responsive */
@@ -270,8 +321,7 @@
 {% endblock %}
 
 {% block body_content %}
-<!-- Hero de la carrera -->
-<section class="carrera-hero">
+<section class="carrera-hero" style="--azul: {{ carrera.color_tematico }};">
   <div class="carrera-hero-content">
     <h1>{{ carrera.nombre }}</h1>
     <p class="descripcion">{{ carrera.descripcion }}</p>
@@ -285,13 +335,14 @@
   </div>
 </section>
 
-<!-- Contenido principal -->
+
 <section class="carrera-content">
   <div class="carrera-grid">
+
     
-    <!-- Columna izquierda: Información detallada -->
     <div class="carrera-main">
-      <!-- Perfil de Egreso -->
+
+      
       <div class="carrera-info-section">
         <h2>Perfil de Egreso</h2>
         {% if carrera.perfil_egreso %}
@@ -300,39 +351,88 @@
           <p>No se ha agregado información sobre el perfil de egreso.</p>
         {% endif %}
       </div>
+
       
-      <!-- Materias -->
       <div class="carrera-info-section">
         <h2>Plan de Estudios - Materias</h2>
         {% if materias_preview %}
           <ul class="carrera-materias-list">
             {% for materia in materias_preview %}
-            <li>• {{ materia }}</li>
+              <li>• {{ materia }}</li>
             {% empty %}
-            <li>No se han registrado materias.</li>
+              <li>No se han registrado materias.</li>
             {% endfor %}
           </ul>
-           {% if materias_restantes > 0 %}
-          <p class="materias-nota">Y {{ materias_restantes }} materia{{ materias_restantes|pluralize }} más en el plan de estudios completo.</p>
-        {% endif %}
-        {% if carrera.plan_estudios_pdf %}
-          <a href="{{ carrera.plan_estudios_pdf.url }}" class="btn-plan-completo" target="_blank" download>
-            📄 Ver plan de estudios completo
-          </a>
+          {% if materias_restantes > 0 %}
+            <p class="materias-nota">Y {{ materias_restantes }} materia{{ materias_restantes|pluralize }} más en el plan de estudios completo.</p>
+          {% endif %}
+          {% if carrera.plan_estudios_pdf %}
+            <a href="{{ carrera.plan_estudios_pdf.url }}" class="btn-plan-completo" target="_blank" download>
+              📄 Ver plan de estudios completo
+            </a>
           {% endif %}
         {% else %}
           <p>No se han registrado materias.</p>
         {% endif %}
       </div>
+
       
-      <!-- Otros detalles (podés agregar más secciones aquí) -->
+      <div class="carrera-info-section">
+        <h2>Salidas Laborales</h2>
+        {% if carrera.salidas_laborales %}
+          <ul class="salidas-lista">
+            {% for salida in carrera.salidas_laborales.splitlines %}
+              {% if salida.strip %}
+                <li>{{ salida }}</li>
+              {% endif %}
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p>Información sobre salidas laborales próximamente.</p>
+        {% endif %}
+      </div>
+
+      
       <div class="carrera-info-section">
         <h2>Información Adicional</h2>
-        <p>Para más información sobre inscripciones, horarios y requisitos, por favor contactate con nosotros a través del formulario.</p>
+        {% if carrera.informacion_adicional %}
+          {{ carrera.informacion_adicional|linebreaks }}
+        {% else %}
+          <p>Para más información sobre inscripciones, horarios y requisitos, contactate con nosotros a través del formulario.</p>
+        {% endif %}
       </div>
-    </div>
+
+      
+      <div class="carrera-info-section">
+        <h2>Convenios Institucionales</h2>
+        {% if carrera.convenios %}
+          <ul class="convenios-lista">
+            {% for convenio in carrera.convenios.splitlines %}
+              {% if convenio.strip %}
+                <li>{{ convenio }}</li>
+              {% endif %}
+            {% endfor %}
+          </ul>
+        {% else %}
+          <p>Sin convenios cargados por el momento.</p>
+        {% endif %}
+      </div>
+
+            
+      <div class="carrera-info-section">
+        <h2>Inscripciones</h2>
+        {% if carrera.inscripciones %}
+          <div class="inscripciones-box">
+            {{ carrera.inscripciones|linebreaks }}
+          </div>
+        {% else %}
+          <p>Para conocer fechas y requisitos de inscripción, escribinos desde el <a href="#contacto" style="color: var(--azul-claro); font-weight: 700;">formulario de contacto</a>.</p>
+        {% endif %}
+      </div>
+
+    </div>  
+
     
-    <!-- Columna derecha: Sidebar -->
     <aside class="carrera-sidebar">
       <div class="carrera-sidebar-card">
         <h3>Datos Rápidos</h3>
@@ -343,19 +443,19 @@
           </li>
           <li>
             <strong>Modalidad</strong>
-            Presencial
+            {{ carrera.modalidad }}
           </li>
           <li>
             <strong>Grado</strong>
-            Técnico Superior
+            {{ carrera.tipo_grado }}
           </li>
           <li>
             <strong>Ubicación</strong>
-            Trancas, Tucumán
+            {{ carrera.ubicacion }}
           </li>
         </ul>
       </div>
-      
+
       <div class="carrera-sidebar-card">
         <h3>Contacto</h3>
         <p style="font-size: 14px; line-height: 1.6; margin-bottom: 16px;">
@@ -365,7 +465,7 @@
           Ir al formulario de contacto →
         </a>
       </div>
-      
+
       {% if carrera.resolucion_pdf %}
       <div class="carrera-pdf-box">
         <p>Resolución oficial de creación de la carrera</p>
@@ -375,159 +475,10 @@
       </div>
       {% endif %}
     </aside>
-    
-  </div>
+
+  </div>  
 </section>
 
-<!-- Sección de Contacto (reutilizada de index, pero con dato prellenado) -->
-<section id="contacto" class="contacto-bg">
-  <div class="container">
-    <div class="section-header">
-      <div class="eyebrow eyebrow-contacto">📞 Comunicación</div>
-      <h2>Ponete en contacto con nosotros</h2>
-      <div class="divider"></div>
-      <p>Estamos para responder tus consultas sobre inscripciones, carreras, horarios y todo lo que necesites saber sobre el instituto.</p>
-    </div>
-
-    <div class="contacto-grid">
-      <div class="contacto-left">
-        <form class="form-contacto" id="formContacto" onsubmit="enviarFormularioContacto(event)">
-          <input type="text" id="nombre" placeholder="Nombre completo" required />
-          <input type="email" id="email" placeholder="Correo electrónico" required />
-          
-          <!-- Campo oculto que se llena automáticamente con el nombre de la carrera -->
-          <input type="hidden" id="motivo_carrera" value="Consulta sobre {{ carrera.nombre }}">
-          
-          <select id="motivo">
-            <option value="general">Consulta General</option>
-            <option value="inscripcion">Inscripción</option>
-            <option value="documentacion">Documentación</option>
-            <option value="carrera">Consulta sobre esta carrera</option>
-            <option value="otro">Otro</option>
-          </select>
-          
-          <textarea id="mensaje" placeholder="Tu mensaje..." required></textarea>
-          <button type="submit" class="btn-enviar">Enviar consulta</button>
-        </form>
-        <div class="form-ok" id="formOk" style="display: none;">✅ ¡Mensaje enviado! Te responderemos a la brevedad.</div>
-      </div>
-
-      <div class="contacto-right">
-        <div id="mapa-container" class="mapa-box"></div>
-        <div class="contacto-datos-bajo">
-          <div class="dato">
-            <span class="dato-icon">📍</span>
-            <span id="direccion-texto">Av. Hipólito Yrigoyen 351, Trancas, Tucumán</span>
-          </div>
-          <div class="dato">
-            <span class="dato-icon">✉️</span>
-            <span id="email-texto">ies@trancas.edu.ar</span>
-          </div>
-          <div class="dato">
-            <span class="dato-icon">🕐</span>
-            <span id="horario-texto">Lun–Vie: 17:00 a 21:30</span>
-          </div>
-        </div>
-      </div>
-    </div>
-  </div>
-</section>
+{% include 'core/_contacto.html' %}
 {% endblock %}
 
-{% block extra_scripts %}
-<script>
-  // Lógica del formulario de contacto (reutilizada)
-  function getCookie(name) {
-    let cookieValue = null;
-    if (document.cookie && document.cookie !== '') {
-      const cookies = document.cookie.split(';');
-      for (let i = 0; i < cookies.length; i++) {
-        const cookie = cookies[i].trim();
-        if (cookie.startsWith(name + '=')) {
-          cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-          break;
-        }
-      }
-    }
-    return cookieValue;
-  }
-
-  async function enviarFormularioContacto(e) {
-    e.preventDefault();
-    
-    const nombre = document.getElementById('nombre').value;
-    const email = document.getElementById('email').value;
-    const motivoSelect = document.getElementById('motivo').value;
-    const mensaje = document.getElementById('mensaje').value;
-    const motivoCarrera = document.getElementById('motivo_carrera').value;
-
-    // Si el motivo seleccionado es "carrera", usamos el texto prellenado
-    const motivoFinal = motivoSelect === 'carrera' ? motivoCarrera : motivoSelect;
-
-    const datos = {
-      nombre: nombre,
-      email: email,
-      motivo: motivoFinal,
-      mensaje: mensaje
-    };
-
-    const csrftoken = getCookie('csrftoken');
-
-    try {
-      const respuesta = await fetch('/api/contacto/', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'X-CSRFToken': csrftoken
-        },
-        body: JSON.stringify(datos)
-      });
-
-      const resultado = await respuesta.json();
-
-      if (resultado.ok) {
-        document.getElementById('formContacto').style.display = 'none';
-        document.getElementById('formOk').style.display = 'block';
-      } else {
-        alert('Error: ' + resultado.error);
-      }
-    } catch (error) {
-      console.error('Error de red:', error);
-      alert('Error de conexión');
-    }
-  }
-
-  // Cargar mapa (reutilizada)
-  async function cargarMapa() {
-    try {
-      const respuesta = await fetch('/api/config/');
-      const config = await respuesta.json();
-      
-      if (config.url_mapa) {
-        document.getElementById('mapa-container').innerHTML = `
-          <iframe 
-            src="${config.url_mapa}" 
-            width="100%" 
-            height="350" 
-            style="border:0;" 
-            allowfullscreen="" 
-            loading="lazy" 
-            referrerpolicy="no-referrer-when-downgrade">
-          </iframe>
-        `;
-        
-        document.getElementById('direccion-texto').textContent = config.direccion || 'Av. Hipólito Yrigoyen 351, Trancas, Tucumán';
-        document.getElementById('email-texto').textContent = config.email || 'ies@trancas.edu.ar';
-        document.getElementById('horario-texto').textContent = config.horario || 'Lun–Vie: 17:00 a 21:30';
-      }
-    } catch (error) {
-      console.error('Error al cargar el mapa:', error);
-    }
-  }
-
-  // Ejecutar al cargar
-  document.addEventListener('DOMContentLoaded', () => {
-    cargarMapa();
-  });
-</script>
-{% endblock %}

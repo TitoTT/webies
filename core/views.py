@@ -1,161 +1,202 @@
-from django.http import JsonResponse
-from django.shortcuts import render, get_object_or_404
-from .models import Noticia, Carrera, Autoridad, Consulta, ConfigInstitucion
 import json
+from django.core.cache import cache
+from django.core.exceptions import ValidationError
+from django.core.paginator import Paginator
+from django.core.validators import validate_email
+from django.http import HttpResponse, JsonResponse
+from django.shortcuts import get_object_or_404, render
+from django.views.decorators.csrf import ensure_csrf_cookie
+from .models import Autoridad, Carrera, Consulta, Noticia
 
+NOTICIAS_EN_HOME = 6      
+NOTICIAS_POR_PAGINA = 9   
+MATERIAS_EN_PREVIEW = 6   
+
+
+LIMITE_ENVIOS = 5          
+VENTANA_SEGUNDOS = 3600    
+SEGUNDOS_MINIMOS = 3       
+
+DESCRIPCION_SITIO = (
+    'Instituto de Educación Superior de Trancas, Tucumán. '
+    'Tecnicaturas y profesorados de nivel superior.'
+)
+
+
+def _resumir(texto, largo=200):
+    """Texto en una sola línea y recortado, para las etiquetas meta."""
+    texto = ' '.join((texto or '').split())
+    if len(texto) <= largo:
+        return texto
+    return texto[:largo - 1].rstrip() + '…'
+
+
+def _ip_cliente(request):
+    """IP real de la visita. Detrás de Cloudflare viene en CF-Connecting-IP."""
+    return request.META.get('HTTP_CF_CONNECTING_IP') or request.META.get('REMOTE_ADDR', 'desconocida')
+
+
+@ensure_csrf_cookie
 def index(request):
-    """
-    Vista que muestra la página principal (index.html)
-    """
-    return render(request, 'core/index.html')
+    """Página principal: noticias, carreras y autoridades salen directo de la base."""
+    carreras = list(Carrera.objects.exclude(slug=''))
+    noticias = Noticia.objects.exclude(slug='')
 
-def api_noticias(request):
-    """
-    Vista API que devuelve todas las noticias en formato JSON.
-    """
-    # 1. Obtener todas las noticias de la BD, ordenadas por fecha (más nuevas primero)
-    noticias_db = Noticia.objects.all().order_by('-fecha_publicacion')
+    context = {
+        'noticias': noticias[:NOTICIAS_EN_HOME],
+        'hay_mas_noticias': noticias.count() > NOTICIAS_EN_HOME,
+        'carreras': carreras,
+        'total_carreras': len(carreras),
+        'autoridades': Autoridad.objects.order_by('cargo'),
+        'meta_descripcion': DESCRIPCION_SITIO,
+    }
+    return render(request, 'core/home.html', context)
+
+
+def lista_noticias(request):
+    """Todas las noticias, de a NOTICIAS_POR_PAGINA por página."""
+    noticias = Noticia.objects.exclude(slug='').order_by('-destacada', '-fecha_publicacion', '-id')
+    paginador = Paginator(noticias, NOTICIAS_POR_PAGINA)
+    pagina = paginador.get_page(request.GET.get('page'))  
+
+    context = {
+        'page_obj': pagina,
+        'paginas': paginador.get_elided_page_range(pagina.number, on_each_side=1, on_ends=1), # type: ignore
+        'meta_titulo': 'Noticias - IES Trancas',
+        'meta_descripcion': 'Novedades, avisos y comunicados del Instituto de Educación Superior de Trancas.',
+    }
+    return render(request, 'core/lista_noticias.html', context)
+
+
+def detalle_noticia(request, slug):
+    """Página individual de una noticia."""
+    noticia = get_object_or_404(Noticia, slug=slug)
+
+    otras = Noticia.objects.exclude(slug='').exclude(pk=noticia.pk)
+    relacionadas = list(otras.filter(categoria=noticia.categoria)[:3])
+
     
-    # 2. Convertir la lista de objetos de Django a una lista de diccionarios
-    #    (Esto es lo que tu JS necesita para renderizar)
-    noticias_json = []
-    for noticia in noticias_db:
-        # Formateamos la fecha para que coincida con el formato que usás en tu JS
-        # Ej: "15 de noviembre, 2026"
-        fecha_str = noticia.fecha_publicacion.strftime("%d de %B, %Y")
-        
-        noticia_data = {
-            "id": noticia.id, # type: ignore
-            "categoria": noticia.categoria,
-            "titulo": noticia.titulo,
-            "texto": noticia.texto,
-            "fecha": fecha_str,
-            "imagen": noticia.imagen  # Aquí viene la ruta 'imagenes/...'
-        }
-        noticias_json.append(noticia_data)
-    
-    # 3. Devolver como JSON
-    return JsonResponse(noticias_json, safe=False)
+    if len(relacionadas) < 3:
+        faltan = 3 - len(relacionadas)
+        extra = otras.exclude(pk__in=[r.pk for r in relacionadas])[:faltan]
+        relacionadas += list(extra)
+
+    context = {
+        'noticia': noticia,
+        'relacionadas': relacionadas,
+        'meta_titulo': noticia.titulo,
+        'meta_descripcion': _resumir(noticia.resumen or noticia.texto),
+        'meta_imagen': noticia.imagen.url if noticia.imagen else '',
+        'meta_tipo': 'article',
+    }
+    return render(request, 'core/detalle_noticia.html', context)
 
 
-def api_carreras(request):
-    """
-    Vista API que devuelve todas las carreras en formato JSON.
-    """
-    # 1. Obtener todas las carreras
-    carreras_db = Carrera.objects.all()
-    
-    # 2. Convertir a lista de diccionarios
-    carreras_json = []
-    for carrera in carreras_db:
-        # Separamos las materias por coma
-        materias_list = carrera.materias.split(',')
-
-        slug = carrera.slug if carrera.slug else ''
-
-        carrera_data = {
-            'id': carrera.id, # type: ignore
-            'nombre': carrera.nombre,
-            'slug': slug,
-            'descripcion': carrera.descripcion,
-            'duracion': carrera.duracion,
-            'materias': materias_list,
-            # Si no tenés campo imagen en el modelo, usamos un default
-            'imagen': getattr(carrera, 'imagen', 'imagenes/default_carrera.jpg')
-        }
-        carreras_json.append(carrera_data)
-    
-    return JsonResponse(carreras_json, safe=False)
-
+@ensure_csrf_cookie
 def detalle_carrera(request, slug):
-    """
-    Vista para mostrar el detalle de una carrera específica usando slug.
-    """
+    """Página de detalle de una carrera."""
     carrera = get_object_or_404(Carrera, slug=slug)
 
-        # Separamos las materias por coma y limpiamos espacios en blanco
     materias_list = [m.strip() for m in carrera.materias.split(',') if m.strip()]
 
-    CANTIDAD_PREVIEW = 6
-    materias_preview = materias_list[:CANTIDAD_PREVIEW]
-    materias_restantes = max(len(materias_list) - CANTIDAD_PREVIEW, 0)
-    
     context = {
         'carrera': carrera,
         'materias_list': materias_list,
-        'materias_preview': materias_preview,
-        'materias_restantes': materias_restantes,
+        'materias_preview': materias_list[:MATERIAS_EN_PREVIEW],
+        'materias_restantes': max(len(materias_list) - MATERIAS_EN_PREVIEW, 0),
+        'meta_titulo': carrera.nombre,
+        'meta_descripcion': _resumir(carrera.descripcion),
+        'meta_imagen': carrera.imagen.url if carrera.imagen else '',
     }
-    
     return render(request, 'core/detalle_carrera.html', context)
 
 
-def api_autoridades(request):
-    """
-    Vista API que devuelve todas las autoridades en formato JSON.
-    """
-    # 1. Obtener todas las autoridades (opcional: ordenar por cargo o nombre)
-    autoridades_db = Autoridad.objects.all().order_by('cargo')
-    
-    # 2. Convertir a lista de diccionarios
-    autoridades_json = []
-    for autoridad in autoridades_db:
-        autoridad_data = {
-            'id': autoridad.id, # type: ignore
-            'iniciales': autoridad.iniciales,
-            'nombre': autoridad.nombre,
-            'cargo': autoridad.cargo
-        }
-        autoridades_json.append(autoridad_data)
-    
-    return JsonResponse(autoridades_json, safe=False)
-
-
 def api_contacto(request):
-    """
-    Vista API para recibir consultas del formulario.
-    Solo acepta métodos POST.
-    """
-    if request.method == 'POST':
-        # 1. Leer los datos JSON enviados por el JS
-        try:
-            datos = json.loads(request.body)
-        except json.JSONDecodeError:
-            return JsonResponse({'ok': False, 'error': 'Datos inválidos'}, status=400)
+    """Recibe consultas del formulario. Solo acepta POST."""
+    if request.method != 'POST':
+        return JsonResponse({'ok': False, 'error': 'Método no permitido'}, status=405)
 
-        # 2. Validar campos obligatorios
-        if not datos.get('nombre') or not datos.get('email') or not datos.get('mensaje'):
-            return JsonResponse({'ok': False, 'error': 'Faltan campos obligatorios'}, status=400)
+    try:
+        datos = json.loads(request.body)
+    except (json.JSONDecodeError, UnicodeDecodeError):
+        return JsonResponse({'ok': False, 'error': 'Datos inválidos'}, status=400)
 
-        # 3. Guardar en la base de datos
-        consulta = Consulta.objects.create(
-            nombre=datos['nombre'],
-            email=datos['email'],
-            motivo=datos.get('motivo', 'otro'), # Si no envía motivo, pone 'otro' por defecto
-            mensaje=datos['mensaje']
+    if not isinstance(datos, dict):
+        return JsonResponse({'ok': False, 'error': 'Datos inválidos'}, status=400)
+
+    # ── Anti-spam ─────────────────────────────────────────
+    respuesta_falsa = JsonResponse({'ok': True, 'mensaje': 'Consulta enviada correctamente'})
+
+    # 1) Campo trampa: está oculto para las personas, solo los bots lo completan
+    if str(datos.get('web', '')).strip():
+        return respuesta_falsa
+
+    # 2) Enviado demasiado rápido: un humano no escribe un mensaje en 3 segundos
+    # (si no viene el dato, por ejemplo con el JS viejo en caché, no se bloquea)
+    segundos = datos.get('segundos')
+    if isinstance(segundos, (int, float)) and segundos < SEGUNDOS_MINIMOS:
+        return respuesta_falsa
+
+    # 3) Límite de envíos por IP
+    clave = f'contacto_envios:{_ip_cliente(request)}'
+    if cache.get(clave, 0) >= LIMITE_ENVIOS:
+        return JsonResponse(
+            {'ok': False, 'error': 'Enviaste muchas consultas en poco tiempo. Probá de nuevo más tarde.'},
+            status=429,
         )
 
-        # 4. Responder éxito
-        return JsonResponse({'ok': True, 'mensaje': 'Consulta enviada correctamente'})
+    # ── Validación ────────────────────────────────────────
+    nombre = str(datos.get('nombre', '')).strip()
+    email = str(datos.get('email', '')).strip()
+    mensaje = str(datos.get('mensaje', '')).strip()
+    motivo = datos.get('motivo', 'otro')
 
-    # Si intentan entrar con GET, devolver error o redirigir
-    return JsonResponse({'ok': False, 'error': 'Método no permitido'}, status=405)
+    if not nombre or not email or not mensaje:
+        return JsonResponse({'ok': False, 'error': 'Faltan campos obligatorios'}, status=400)
+
+    try:
+        validate_email(email)
+    except ValidationError:
+        return JsonResponse({'ok': False, 'error': 'El email no es válido'}, status=400)
+
+    if len(nombre) > 100:
+        return JsonResponse({'ok': False, 'error': 'El nombre es demasiado largo'}, status=400)
+    if len(mensaje) > 2000:
+        return JsonResponse({'ok': False, 'error': 'El mensaje supera los 2000 caracteres'}, status=400)
+
+    # Si el motivo no es uno de los permitidos, se guarda como 'otro'
+    motivos_validos = [clave_motivo for clave_motivo, _ in Consulta.MOTIVO_CHOICES]
+    if motivo not in motivos_validos:
+        motivo = 'otro'
+
+    Consulta.objects.create(nombre=nombre, email=email, motivo=motivo, mensaje=mensaje)
+
+    # Sumamos 1 al contador de esta IP (se vence solo después de la ventana)
+    if not cache.add(clave, 1, VENTANA_SEGUNDOS):
+        try:
+            cache.incr(clave)
+        except ValueError:
+            cache.set(clave, 1, VENTANA_SEGUNDOS)
+
+    return JsonResponse({'ok': True, 'mensaje': 'Consulta enviada correctamente'})
 
 
-def api_config(request):
-    """
-    Devuelve la configuración de la institución (incluye la URL del mapa).
-    """
-    config = ConfigInstitucion.objects.first()
-    
-    if config:
-        return JsonResponse({
-            'nombre': config.nombre,
-            'direccion': config.direccion,
-            'url_mapa': config.url_mapa,
-            'telefono': config.telefono,
-            'email': config.email,
-            'horario': config.horario
-        })
-    
-    return JsonResponse({'error': 'No hay configuración'}, status=404)
+def robots_txt(request):
+    """robots.txt: le dice a Google qué no indexar y dónde está el sitemap."""
+    lineas = [
+        'User-agent: *',
+        'Disallow: /admin/',
+        'Disallow: /api/',
+        '',
+        f'Sitemap: {request.scheme}://{request.get_host()}/sitemap.xml',
+    ]
+    return HttpResponse('\n'.join(lineas), content_type='text/plain')
+
+
+# ── Vista previa de las páginas de error (solo con DEBUG = True) ──
+def preview_404(request):
+    return render(request, '404.html', status=404)
+
+
+def preview_500(request):
+    return render(request, '500.html', status=500)

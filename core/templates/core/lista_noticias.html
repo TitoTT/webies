@@ -1,0 +1,58 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Noticias{% if page_obj.number > 1 %} - Página {{ page_obj.number }}{% endif %} - IES Trancas{% endblock %}
+
+{% block body_content %}
+<section class="listado-noticias">
+  <div class="container">
+    <div class="section-header">
+      <div class="eyebrow">Novedades</div>
+      <h1>Todas las noticias</h1>
+      <div class="divider"></div>
+    </div>
+
+    <div class="noticias-grid">
+      {% for n in page_obj %}
+      <a href="{% url 'detalle_noticia' n.slug %}" class="noticia-card">
+        <div class="noticia-img" {% if n.imagen %}style="background-image: url('{{ n.imagen.url }}');"{% endif %}></div>
+        <div class="noticia-body">
+          <div class="noticia-cat">{{ n.categoria }}</div>
+          <h2>{{ n.titulo }}</h2>
+          <p>{{ n.resumen|default:n.texto|truncatechars:150 }}</p>
+          <span class="noticia-fecha">📅 {{ n.fecha_publicacion|date:"j \\d\\e F, Y" }}</span>
+        </div>
+      </a>
+      {% empty %}
+      <p>Todavía no hay noticias publicadas.</p>
+      {% endfor %}
+    </div>
+
+    {% if page_obj.paginator.num_pages > 1 %}
+    <div class="paginacion" role="navigation" aria-label="Paginación de noticias">
+      {% if page_obj.has_previous %}
+      <a href="?page={{ page_obj.previous_page_number }}" rel="prev">← Anterior</a>
+      {% endif %}
+
+      {% for p in paginas %}
+        {% if p == page_obj.paginator.ELLIPSIS %}
+        <span class="pag-puntos" aria-hidden="true">…</span>
+        {% elif p == page_obj.number %}
+        <span class="pag-actual" aria-current="page">{{ p }}</span>
+        {% else %}
+        <a href="?page={{ p }}" aria-label="Ir a la página {{ p }}">{{ p }}</a>
+        {% endif %}
+      {% endfor %}
+
+      {% if page_obj.has_next %}
+      <a href="?page={{ page_obj.next_page_number }}" rel="next">Siguiente →</a>
+      {% endif %}
+    </div>
+    <p class="pag-estado">Página {{ page_obj.number }} de {{ page_obj.paginator.num_pages }}</p>
+    {% endif %}
+
+    <div class="ver-todas">
+      <a href="{% url 'index' %}" class="btn-ver-todas">← Volver al inicio</a>
+    </div>
+  </div>
+</section>
+{% endblock %}

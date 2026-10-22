@@ -7,78 +7,54 @@
   <link rel="icon" href="{% static 'imagenes/logo.png' %}" type="image/png">
   <link rel="stylesheet" href="{% static 'css/estilos.css' %}">
 
-  <!-- Título dinámico: cada plantilla puede cambiarlo -->
   <title>{% block title %}IES Trancas{% endblock %}</title>
+
+  {% with descripcion=meta_descripcion|default:"Instituto de Educación Superior de Trancas, Tucumán. Tecnicaturas y profesorados de nivel superior." %}
+  <meta name="description" content="{{ descripcion }}">
+  <link rel="canonical" href="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
+  <meta property="og:site_name" content="IES Trancas">
+  <meta property="og:locale" content="es_AR">
+  <meta property="og:type" content="{{ meta_tipo|default:'website' }}">
+  <meta property="og:title" content="{{ meta_titulo|default:'IES Trancas - Instituto de Educación Superior' }}">
+  <meta property="og:description" content="{{ descripcion }}">
+  <meta property="og:url" content="{{ request.scheme }}://{{ request.get_host }}{{ request.path }}">
+  <meta property="og:image" content="{{ request.scheme }}://{{ request.get_host }}{% if meta_imagen %}{{ meta_imagen }}{% else %}{% static 'imagenes/logo.png' %}{% endif %}">
+  <meta name="twitter:card" content="{% if meta_imagen %}summary_large_image{% else %}summary{% endif %}">
+  {% endwith %}
+
   
-  <!-- Fuentes de Google -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Merriweather:wght@700&display=swap" rel="stylesheet" />
-  
-  <!-- Estilos globales -->
-  <style>
-    /* Variables de color (repetidas de tu index.html) */
-    :root {
-      --azul:       #003366;
-      --azul-med:   #004B99;
-      --azul-claro: #0066CC;
-      --dorado:     #F86106;
-      --dorado-cl:  #F0B942;
-      --blanco:     #FFFFFF;
-      --gris-bg:    #F4F6F9;
-      --gris-texto: #444444;
-      --gris-claro: #E8ECF2;
-    }
-    
-    /* Reset básico */
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    
-    html { scroll-behavior: smooth; }
-    
-    body { 
-      font-family: 'Inter', sans-serif; 
-      color: var(--gris-texto); 
-      background: var(--blanco);
-      min-height: 100vh;
-      display: flex;
-      flex-direction: column;
-    }
-    
-    /* Contenedor principal para que el footer quede abajo */
-    .main-container {
-      flex: 1;
-      display: flex;
-      flex-direction: column;
-    }
-    
-    /* Bloque principal donde cada plantilla inyecta su contenido */
-    {% block content %}
-    {% endblock %}
-  </style>
-  
-  <!-- Bloque para añadir estilos específicos de cada plantilla -->
+
   {% block extra_styles %}{% endblock %}
 </head>
 <body>
-  <!-- Barra de navegación (se comparte en todas las páginas) -->
+  <a href="#contenido" class="skip-link">Saltar al contenido</a>
+
+  
   {% block navbar %}
-  <nav>
+  <nav aria-label="Menú principal">
     <div class="nav-top">
-      <span>📍 Av. Hipólito Yrigoyen 351, Trancas, Tucumán</span>
-      <span>&nbsp; <a href="mailto:ies@trancas.edu.ar">ies@trancas.edu.ar</a></span>
+      <span>📍 {{ config_institucion.direccion }}</span>
+      {% if config_institucion.email %}
+      <span>&nbsp; <a href="mailto:{{ config_institucion.email }}">{{ config_institucion.email }}</a></span>
+      {% endif %}
     </div>
     <div class="nav-main">
       <a href="{% url 'index' %}" class="nav-logo">
-        <img src="{% static 'imagenes/logo.png' %}" alt="logo IES" class="logo-escudo" />
+        <img src="{% static 'imagenes/logo.png' %}" alt="Escudo del IES Trancas" class="logo-escudo" />
         <div class="logo-texto">
-          <div class="inst">IES Trancas</div>
+          <div class="inst">Instituto de Educacion Superior</div>
           <div class="sub">Trancas, Tucumán</div>
         </div>
       </a>
       <ul class="nav-links" id="navLinks">
-        <li><a href="{% url 'index' %}">Inicio</a></li>
-        <li><a href="#carreras">Carreras</a></li>
-        <li><a href="#contacto">Contacto</a></li>
+        <li><a href="{% url 'index' %}#inicio">Inicio</a></li>
+        <li><a href="{% url 'index' %}#noticias">Noticias</a></li>
+        <li><a href="{% url 'index' %}#carreras">Carreras</a></li>
+        <li><a href="{% url 'index' %}#autoridades">Autoridades</a></li>
+        <li><a href="{% url 'index' %}#contacto">Contacto</a></li>
       </ul>
-      <button class="hamburger" onclick="toggleNav()" aria-label="Menú">
+      <button class="hamburger" onclick="toggleNav()" aria-label="Abrir o cerrar el menú" aria-expanded="false" aria-controls="navLinks">
         <span></span><span></span><span></span>
       </button>
     </div>
@@ -86,13 +62,13 @@
   {% endblock %}
 
   <!-- Contenedor principal -->
-  <div class="main-container">
-    <!-- Aquí se inyecta el contenido de cada plantilla hija -->
+  <main class="main-container" id="contenido" tabindex="-1">
+  
     {% block body_content %}
     {% endblock %}
-  </div>
+  </main>
 
-  <!-- Pie de página (se comparte en todas las páginas) -->
+
   {% block footer %}
   <footer>
     <div class="footer-inner">
@@ -104,33 +80,30 @@
         <h4>Accesos rápidos</h4>
         <ul>
           <li><a href="{% url 'index' %}">Inicio</a></li>
-          <li><a href="#contacto">Contacto</a></li>
+          <li><a href="{% url 'index' %}#noticias">Noticias</a></li>
+          <li><a href="{% url 'index' %}#carreras">Carreras</a></li>
+          <li><a href="{% url 'index' %}#contacto">Contacto</a></li>
         </ul>
       </div>
+      {% if config_institucion.calendario_academico %}
       <div>
         <h4>Información</h4>
         <ul>
-          <li><a href="#">Calendario académico</a></li>
-          <li><a href="#">Inscripciones</a></li>
-          <li><a href="#">Resoluciones</a></li>
-          <li><a href="#">Ministerio de Educación</a></li>
+          <li><a href="{{ config_institucion.calendario_academico.url }}" target="_blank" rel="noopener">Calendario académico</a></li>
         </ul>
       </div>
+      {% endif %}
     </div>
     <div class="footer-bottom">
-      <p>© 2025 IES Trancas. Todos los derechos reservados.</p>
+      <p>© {% now "Y" %} IES Trancas. Todos los derechos reservados.</p>
     </div>
   </footer>
   {% endblock %}
 
-  <!-- Scripts globales -->
-  <script>
-    function toggleNav() {
-      document.getElementById('navLinks').classList.toggle('abierto');
-    }
-  </script>
+
+  <script src="{% static 'js/main.js' %}"></script>
+
   
-  <!-- Bloque para añadir scripts específicos de cada plantilla -->
   {% block extra_scripts %}{% endblock %}
 </body>
 </html>

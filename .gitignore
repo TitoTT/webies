@@ -1,38 +1,41 @@
-# Python
-__pycache__/
-*.py[cod]
-*$py.class
+# ═══════════════════════════════════════════════════════════
+#  Lo que Git NO debe guardar (IES Trancas)
+# ═══════════════════════════════════════════════════════════
 
-# Entornos virtuales
+# Datos reales del sitio: noticias, consultas con nombres y mails, usuarios del admin
+db.sqlite3
+db.sqlite3-journal
+db.sqlite3-wal
+db.sqlite3-shm
+*.sqlite3
+
+# Imágenes y PDF subidos desde el admin
+media/
+
+# Respaldos (contienen todo lo anterior)
+backups/
+*.zip
+
+# Claves y configuración privada
+.env
+.env.*
+*.pem
+*.key
+
+# Entorno virtual (se reconstruye con: pip install -r requirements.txt)
 venv/
 .venv/
 env/
-ENV/
 
-# Django
-*.log
-db.sqlite3
-db.sqlite3-journal
-media/
+# Archivos que se generan solos
 staticfiles/
+__pycache__/
+*.py[cod]
+*.log
 
-# Variables de entorno y secretos
-.env
-.env.*
-!.env.example
-
-# Tests y cobertura
-.coverage
-htmlcov/
-.pytest_cache/
-.tox/
-
-# Herramientas y archivos del editor
+# Archivos de cada editor / sistema
 .vscode/
 .idea/
-*.swp
-*.swo
-
-# Archivos del sistema
 .DS_Store
 Thumbs.db
+desktop.ini

@@ -1,0 +1,39 @@
+{% extends 'core/base.html' %}
+
+{% block title %}Página no encontrada - IES Trancas{% endblock %}
+
+{% block extra_styles %}
+<meta name="robots" content="noindex">
+<style>
+  .error-page { text-align: center; padding: 80px 24px 96px; max-width: 680px; margin: 0 auto; }
+  .error-codigo {
+    font-family: 'Merriweather', serif;
+    font-size: clamp(80px, 22vw, 150px); line-height: 1; color: var(--azul);
+  }
+  .error-codigo span { color: var(--dorado); }
+  .error-page h1 { font-size: clamp(22px, 4vw, 30px); color: var(--azul); margin: 14px 0; }
+  .error-page p { font-size: 16px; line-height: 1.7; margin-bottom: 30px; }
+  .error-botones { display: flex; gap: 12px; justify-content: center; flex-wrap: wrap; }
+  .error-botones a {
+    padding: 12px 24px; border-radius: 6px; font-weight: 700; font-size: 14px;
+    text-decoration: none; transition: all 0.2s;
+  }
+  .error-btn-principal { background: var(--dorado); color: var(--texto-sobre-dorado); }
+  .error-btn-principal:hover { background: var(--dorado-cl); }
+  .error-btn-secundario { border: 2px solid var(--azul); color: var(--azul); }
+  .error-btn-secundario:hover { background: var(--azul); color: var(--blanco); }
+</style>
+{% endblock %}
+
+{% block body_content %}
+<section class="error-page">
+  <div class="error-codigo">4<span>0</span>4</div>
+  <h1>No encontramos esta página</h1>
+  <p>El enlace puede estar roto o la página ya no existe. Volvé al inicio o andá directo a lo que estabas buscando.</p>
+  <div class="error-botones">
+    <a href="{% url 'index' %}" class="error-btn-principal">Volver al inicio</a>
+    <a href="{% url 'index' %}#carreras" class="error-btn-secundario">Ver carreras</a>
+    <a href="{% url 'index' %}#noticias" class="error-btn-secundario">Ver noticias</a>
+  </div>
+</section>
+{% endblock %}

@@ -1,0 +1,80 @@
+<section id="contacto" class="contacto-bg">
+  <div class="container">
+    <div class="section-header">
+      <div class="eyebrow eyebrow-contacto"><span aria-hidden="true"></span> Comunicación</div>
+      <h2>Ponete en contacto con nosotros</h2>
+      <div class="divider"></div>
+      <p>Estamos para responder tus consultas sobre inscripciones, carreras, horarios y todo lo que necesites saber sobre el instituto.</p>
+    </div>
+
+    <div class="contacto-grid">
+      <div class="contacto-left">
+        <form class="form-contacto" id="formContacto" onsubmit="enviarFormularioContacto(event)">
+          <label for="nombre" class="sr-only">Nombre completo</label>
+          <input type="text" id="nombre" placeholder="Nombre completo" maxlength="100" autocomplete="name" required />
+
+          <label for="email" class="sr-only">Correo electrónico</label>
+          <input type="email" id="email" placeholder="Correo electrónico" autocomplete="email" required />
+
+          {% if carrera %}
+          <input type="hidden" id="motivo_carrera" value="Consulta sobre {{ carrera.nombre }}">
+          {% endif %}
+          <label for="motivo" class="sr-only">Motivo de la consulta</label>
+          <select id="motivo">
+            <option value="general">Consulta General</option>
+            <option value="inscripcion">Inscripción</option>
+            <option value="documentacion">Documentación</option>
+            {% if carrera %}<option value="carrera">Consulta sobre esta carrera</option>{% endif %}
+            <option value="otro">Otro</option>
+          </select>
+
+          
+          <div class="campo-trampa" aria-hidden="true">
+            <label for="contacto_sitio">Dejá este campo vacío</label>
+            <input type="text" id="contacto_sitio" tabindex="-1" autocomplete="off" />
+          </div>
+
+          <label for="mensaje" class="sr-only">Tu mensaje</label>
+          <textarea id="mensaje" placeholder="Tu mensaje..." maxlength="1800" required></textarea>
+
+          <button type="submit" class="btn-enviar">Enviar consulta</button>
+        </form>
+        <div class="form-ok" id="formOk" role="status" aria-live="polite" style="display: none;">✅ ¡Mensaje enviado! Te responderemos a la brevedad.</div>
+      </div>
+
+      <div class="contacto-right">
+        {% if config_institucion.url_mapa %}
+        <div class="mapa-box">
+          <iframe src="{{ config_institucion.url_mapa }}" loading="lazy" allowfullscreen
+                  referrerpolicy="no-referrer-when-downgrade"
+                  title="Mapa con la ubicación del instituto"></iframe>
+        </div>
+        {% endif %}
+        <div class="contacto-datos-bajo">
+          <div class="dato">
+            <span class="dato-icon" aria-hidden="true">📍</span>
+            <span>{{ config_institucion.direccion }}</span>
+          </div>
+          {% if config_institucion.telefono %}
+          <div class="dato">
+            <span class="dato-icon" aria-hidden="true"></span>
+            <span>{{ config_institucion.telefono }}</span>
+          </div>
+          {% endif %}
+          {% if config_institucion.email %}
+          <div class="dato">
+            <span class="dato-icon" aria-hidden="true">✉️</span>
+            <span>{{ config_institucion.email }}</span>
+          </div>
+          {% endif %}
+          {% if config_institucion.horario %}
+          <div class="dato">
+            <span class="dato-icon" aria-hidden="true">🕐</span>
+            <span>{{ config_institucion.horario }}</span>
+          </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</section>

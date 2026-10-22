@@ -1,0 +1,134 @@
+{% extends 'core/base.html' %}
+{% load static %}
+
+{% block title %}{{ noticia.titulo }} - IES Trancas{% endblock %}
+
+{% block extra_styles %}
+<style>
+  .noticia-hero {
+    background: linear-gradient(rgba(0,51,102,0.85), rgba(0,75,153,0.9));
+    background-size: cover;
+    background-position: center;
+    color: var(--blanco); padding: 90px 32px 60px; text-align: center;
+  }
+  .noticia-hero-content { max-width: 850px; margin: 0 auto; position: relative; }
+  .noticia-meta-top {
+    display: inline-flex; gap: 14px; align-items: center; flex-wrap: wrap;
+    justify-content: center; font-size: 13px; margin-bottom: 18px;
+  }
+  .badge-cat {
+    background: var(--dorado); color: var(--texto-sobre-dorado); font-weight: 700;
+    padding: 4px 14px; border-radius: 20px; text-transform: uppercase;
+    font-size: 11px; letter-spacing: 1px;
+  }
+  .noticia-hero h1 {
+    font-family: 'Merriweather', serif;
+    font-size: clamp(26px, 5vw, 42px); line-height: 1.25; margin-bottom: 22px;
+  }
+  .btn-volver-noticia {
+    display: inline-flex; align-items: center; gap: 8px;
+    background: rgba(255,255,255,0.15); color: var(--blanco);
+    padding: 10px 22px; border-radius: 6px; text-decoration: none;
+    font-weight: 600; border: 1px solid rgba(255,255,255,0.3); transition: all 0.2s;
+  }
+  .btn-volver-noticia:hover { background: rgba(255,255,255,0.25); transform: translateY(-2px); }
+
+  .noticia-cuerpo { max-width: 780px; margin: 0 auto; padding: 56px 24px; }
+  .noticia-cuerpo img.destacada-inline {
+    width: 100%; border-radius: 12px; margin-bottom: 28px;
+    box-shadow: 0 8px 24px rgba(0,0,0,0.12);
+  }
+  .noticia-cuerpo p { font-size: 16px; line-height: 1.8; color: #444; margin-bottom: 18px; }
+
+  .share-box {
+    display: flex; gap: 12px; justify-content: center; flex-wrap: wrap;
+    margin: 44px 0 0; padding: 24px; background: var(--gris-bg);
+    border-radius: 12px; border: 1px solid var(--gris-claro);
+  }
+  .share-box strong { width: 100%; text-align: center; color: var(--azul); margin-bottom: 6px; }
+  .share-box a {
+    padding: 10px 20px; border-radius: 6px; text-decoration: none;
+    font-weight: 700; font-size: 14px; color: white; transition: transform 0.2s;
+  }
+  .share-box a:hover { transform: translateY(-2px); }
+  .share-wa { background: #25D366; }
+  .share-fb { background: #1877F2; }
+  .share-x  { background: #000000; }
+
+  .relacionadas-section { background: var(--gris-bg); padding: 56px 32px; }
+  .noticia-card-link { display: block; text-decoration: none; color: inherit; }
+
+  @media (max-width: 768px) {
+    .noticia-hero { padding: 60px 20px 40px; }
+    .noticia-cuerpo { padding: 40px 20px; }
+  }
+</style>
+{% endblock %}
+
+{% block body_content %}
+
+<section class="noticia-hero"
+  {% if noticia.imagen %}
+  style="background-image: linear-gradient(rgba(0,51,102,0.75), rgba(0,75,153,0.85)), url('{{ noticia.imagen.url }}');"
+  {% endif %}>
+  <div class="noticia-hero-content">
+    <div class="noticia-meta-top">
+      <span class="badge-cat">{{ noticia.categoria }}</span>
+      <span>📅 {{ noticia.fecha_publicacion|date:"d \\d\\e F, Y" }}</span>
+      {% if noticia.autor %}<span> {{ noticia.autor }}</span>{% endif %}
+    </div>
+    <h1>{{ noticia.titulo }}</h1>
+    <a href="{% url 'index' %}#noticias" class="btn-volver-noticia">← Volver a noticias</a>
+  </div>
+</section>
+
+
+<article class="noticia-cuerpo">
+  {% if noticia.resumen %}
+    <p style="font-size:18px; color:var(--azul); font-weight:600; line-height:1.6;">
+      {{ noticia.resumen }}
+    </p>
+  {% endif %}
+
+  {{ noticia.texto|linebreaks }}
+
+  
+  <div class="share-box">
+    <strong>Compartí esta noticia:</strong>
+    <a class="share-wa" target="_blank" rel="noopener"
+       href="https://wa.me/?text={{ noticia.titulo|urlencode }}%20{{ request.build_absolute_uri|urlencode }}">💬 WhatsApp</a>
+    <a class="share-fb" target="_blank" rel="noopener"
+       href="https://www.facebook.com/sharer/sharer.php?u={{ request.build_absolute_uri|urlencode }}">📘 Facebook</a>
+    <a class="share-x" target="_blank" rel="noopener"
+       href="https://twitter.com/intent/tweet?text={{ noticia.titulo|urlencode }}&url={{ request.build_absolute_uri|urlencode }}">𝕏 Twitter</a>
+  </div>
+</article>
+
+
+{% if relacionadas %}
+<section class="relacionadas-section">
+  <div class="container">
+    <div class="section-header">
+      <div class="eyebrow">Seguí leyendo</div>
+      <h2>Otras noticias</h2>
+      <div class="divider"></div>
+    </div>
+    <div class="noticias-grid">
+      {% for n in relacionadas %}
+      <a href="{% url 'detalle_noticia' n.slug %}" class="noticia-card noticia-card-link">
+        <div class="noticia-img" {% if n.imagen %}style="background-image:url('{{ n.imagen.url }}')"{% endif %}></div>
+        <div class="noticia-body">
+          <div class="noticia-cat">{{ n.categoria }}</div>
+          <h3>{{ n.titulo }}</h3>
+          <span class="noticia-fecha">📅 {{ n.fecha_publicacion|date:"d/m/Y" }}</span>
+        </div>
+      </a>
+      {% endfor %}
+    </div>
+    <div class="ver-todas">
+      <a href="{% url 'lista_noticias' %}" class="btn-ver-todas">Ver todas las noticias →</a>
+    </div>
+  </div>
+</section>
+{% endif %}
+{% endblock %}
